@@ -96,6 +96,8 @@ class CompressorClientScript extends CClientScript
 		
 		foreach($cssFiles as $cssFile)
 		{
+			if(substr($cssFile,0,1)==='/')//it's a relative url
+				$cssFile=$_SERVER['DOCUMENT_ROOT'].$cssFile;
 			$urlRewriter=new CssUriRewriter($cssFile);
 			$string.=$urlRewriter->rewrite();
 		}
