@@ -165,7 +165,7 @@ class CompressorClientScript extends CClientScript
 			{
 				foreach($this->scriptFiles[self::POS_HEAD] as $file=>$value)
 				{
-					if(substr($fille,0,1)==='/')//it's a relative internal url, prefix with root path
+					if(substr($file,0,1)==='/')//it's a relative internal url, prefix with root path
 						$file=$_SERVER['DOCUMENT_ROOT'].$file;
 					$jsFiles[]=$file;
 				}
@@ -174,7 +174,7 @@ class CompressorClientScript extends CClientScript
 			{
 				foreach($this->scriptFiles[self::POS_BEGIN] as $file=>$value)
 				{
-					if(substr($fille,0,1)==='/')//it's a relative internal url, prefix with root path
+					if(substr($file,0,1)==='/')//it's a relative internal url, prefix with root path
 						$file=$_SERVER['DOCUMENT_ROOT'].$file;
 					$jsFiles[]=$file;
 				}
@@ -183,7 +183,7 @@ class CompressorClientScript extends CClientScript
 			{
 				foreach($this->scriptFiles[self::POS_END] as $file=>$value)
 				{
-					if(substr($fille,0,1)==='/')//it's a relative internal url, prefix with root path
+					if(substr($file,0,1)==='/')//it's a relative internal url, prefix with root path
 						$file=$_SERVER['DOCUMENT_ROOT'].$file;
 					$jsFiles[]=$file;
 				}
@@ -208,7 +208,7 @@ class CompressorClientScript extends CClientScript
 					$fileMedia='screen';
 				if(!isset($cssFiles[$fileMedia]))
 					$cssFiles[$fileMedia]=array();
-				if(substr($fille,0,1)==='/')//it's a relative internal url, prefix with root path
+				if(substr($file,0,1)==='/')//it's a relative internal url, prefix with root path
 					$file=$_SERVER['DOCUMENT_ROOT'].$file;
 				$cssFiles[$fileMedia][]=$file;
 			}
