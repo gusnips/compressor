@@ -22,6 +22,7 @@ class CompressorClientScript extends CClientScript
 	public $compressorOptions=array();
 	private $_jsFiles;
 	private $_cssFiles;
+	private $_tmpPath;
 	
 	/**
 	 * (non-PHPdoc)
@@ -96,8 +97,6 @@ class CompressorClientScript extends CClientScript
 		
 		foreach($cssFiles as $cssFile)
 		{
-			if(substr($cssFile,0,1)==='/')//it's a relative url
-				$cssFile=$_SERVER['DOCUMENT_ROOT'].$cssFile;
 			$urlRewriter=new CssUriRewriter($cssFile);
 			$string.=$urlRewriter->rewrite();
 		}
@@ -165,17 +164,29 @@ class CompressorClientScript extends CClientScript
 			if(isset($this->scriptFiles[self::POS_HEAD]))
 			{
 				foreach($this->scriptFiles[self::POS_HEAD] as $file=>$value)
+				{
+					if(substr($fille,0,1)==='/')//it's a relative internal url, prefix with root path
+						$file=$_SERVER['DOCUMENT_ROOT'].$file;
 					$jsFiles[]=$file;
+				}
 			}
 			if(isset($this->scriptFiles[self::POS_BEGIN]))
 			{
 				foreach($this->scriptFiles[self::POS_BEGIN] as $file=>$value)
+				{
+					if(substr($fille,0,1)==='/')//it's a relative internal url, prefix with root path
+						$file=$_SERVER['DOCUMENT_ROOT'].$file;
 					$jsFiles[]=$file;
+				}
 			}
 			if(isset($this->scriptFiles[self::POS_END]))
 			{
 				foreach($this->scriptFiles[self::POS_END] as $file=>$value)
+				{
+					if(substr($fille,0,1)==='/')//it's a relative internal url, prefix with root path
+						$file=$_SERVER['DOCUMENT_ROOT'].$file;
 					$jsFiles[]=$file;
+				}
 			}
 			$this->_jsFiles=$jsFiles;
 		}
@@ -183,6 +194,7 @@ class CompressorClientScript extends CClientScript
 	}
 	
 	/**
+	 * list of css files
 	 * @return array
 	 */
 	private function _getCssFiles($media=null)
@@ -196,6 +208,8 @@ class CompressorClientScript extends CClientScript
 					$fileMedia='screen';
 				if(!isset($cssFiles[$fileMedia]))
 					$cssFiles[$fileMedia]=array();
+				if(substr($fille,0,1)==='/')//it's a relative internal url, prefix with root path
+					$file=$_SERVER['DOCUMENT_ROOT'].$file;
 				$cssFiles[$fileMedia][]=$file;
 			}
 			$this->_cssFiles=$cssFiles;
@@ -211,9 +225,12 @@ class CompressorClientScript extends CClientScript
 	 */
 	protected function getCompressorTempPath()
 	{
-		$filePath=Yii::app()->getRuntimePath().DIRECTORY_SEPARATOR.'compressor';
-		if(!file_exists($filePath))
-			mkdir($filePath);
-		return $filePath;
+		if($this->_tmpPath===null)
+		{
+			$this->_tmpPath=Yii::app()->getRuntimePath().DIRECTORY_SEPARATOR.'compressor';
+			if(!file_exists($this->_tmpPath))
+				mkdir($this->_tmpPath);
+		}
+		return $this->_tmpPath;
 	}
 }
