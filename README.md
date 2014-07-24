@@ -1,7 +1,7 @@
 CompressorClientScript
 ======================
 
-Assets compressor for Yii Framework
+Assets compressor for Yii Framework 1.x
 
 --
 
@@ -11,7 +11,7 @@ Uses a modified version of https://github.com/gpbmike/PHP-YUI-Compressor for com
 
 Uses a modified version of https://github.com/mrclay/minify/ to rewrite css urls adapted to Yii
 
-# How to use
+## How to use
 
 in your config define the class of clientScript component to use CompressorClientScript
 
@@ -42,15 +42,20 @@ return array(
 ),
 );
 ```
+And that's it
 
-# How to clear the cache?
+## How to clear the cache?
 
 Just clean up protected/runtime/compressor folder and it will recreate the files
 
-# How does it work?
+## How does it work?
 
 It uses file_get_contents to get the files, so it can be either on your machine or load from external sources
 
 It creates a compressed file in protected/runtime/compress for each page and then publishes it using assetsManager
 
 For css files, it rewrites the css url's 
+
+## Licence
+
+MIT
