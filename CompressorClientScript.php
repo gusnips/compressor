@@ -34,27 +34,28 @@ class CompressorClientScript extends CClientScript
 			return;
 
 		$this->renderCoreScripts();
-
-		if(!empty($this->scriptMap))
-			$this->remapScripts();
-
-		$this->unifyScripts();
 		
 		if($this->compress)
 		{
 			if($this->enableJavaScript && count($this->scriptFiles))
 			{
-				$key=$this->_getScriptFilesCompressKey();
-				if(($path=Yii::app()->getGlobalState($key))===null || !file_exists($path))
-				{
-					$path=$this->compressScriptFiles("{$key}.js");
-					//$this->
-					Yii::app()->setGlobalState($key, $path);
-				}
-				$url=Yii::app()->assetManager->publish($path);
-				$this->scriptFiles=array(
-					$this->coreScriptPosition=>array($url=>$url)
-				);
+                //Get the positions from the array keys
+                $positions=$this->scriptFiles;
+                $files = array();
+                foreach($positions as $position => $scripts)
+                {
+                    $key=$this->_getScriptFilesCompressKey($position);
+
+                    if(($path=Yii::app()->getGlobalState($key))===null || !file_exists($path))
+                    {
+                        $path=$this->compressScriptFiles("{$key}.js", $position);
+                        Yii::app()->setGlobalState($key, $path);
+                    }
+                    $url=Yii::app()->assetManager->publish($path);
+                    $files[$position]=array($url => $url);
+                }
+
+                $this->scriptFiles = $files;
 			}
 			if(count($this->cssFiles))
 			{
@@ -76,9 +77,14 @@ class CompressorClientScript extends CClientScript
 			}
 		}
 
+        if(!empty($this->scriptMap))
+            $this->remapScripts();
+
+        $this->unifyScripts();
+
 		$this->renderHead($output);
 		if($this->enableJavaScript)
-		{
+        {
 			$this->renderBodyBegin($output);
 			$this->renderBodyEnd($output);
 		}
@@ -119,9 +125,9 @@ class CompressorClientScript extends CClientScript
 	 * @return string|boolean contents of js file
 	 * false if no files
 	 */
-	protected function compressScriptFiles($filename)
+	protected function compressScriptFiles($filename, $position)
 	{
-		$jsFiles=$this->_getJsFiles();
+		$jsFiles=$this->_getJsFiles($position);
 		
 		$compressor=new YUICompressor($this->compressorOptions);
 		$compressor->type='js';
@@ -137,9 +143,9 @@ class CompressorClientScript extends CClientScript
 	 * 
 	 * @return string
 	 */
-	private function _getScriptFilesCompressKey()
+	private function _getScriptFilesCompressKey($position)
 	{
-		$files=$this->_getJsFiles();
+		$files=$this->_getJsFiles($position);
 		return md5(implode('',$files));
 	}
 	/**
@@ -156,40 +162,52 @@ class CompressorClientScript extends CClientScript
 	/**
 	 * @return array
 	 */
-	private function _getJsFiles()
+	private function _getJsFiles($position = null)
 	{
 		if($this->_jsFiles===null)
 		{
 			$jsFiles=array();
 			if(isset($this->scriptFiles[self::POS_HEAD]))
 			{
+                if(count($this->scriptFiles[self::POS_HEAD]))
+                    $jsFiles[self::POS_HEAD] = array();
+
 				foreach($this->scriptFiles[self::POS_HEAD] as $file=>$value)
 				{
 					if(substr($file,0,1)==='/')//it's a relative internal url, prefix with root path
 						$file=$_SERVER['DOCUMENT_ROOT'].$file;
-					$jsFiles[]=$file;
+                    array_push($jsFiles[self::POS_HEAD], $file);
 				}
 			}
 			if(isset($this->scriptFiles[self::POS_BEGIN]))
 			{
+                if(count($this->scriptFiles[self::POS_BEGIN]))
+                    $jsFiles[self::POS_BEGIN] = array();
+
 				foreach($this->scriptFiles[self::POS_BEGIN] as $file=>$value)
 				{
 					if(substr($file,0,1)==='/')//it's a relative internal url, prefix with root path
 						$file=$_SERVER['DOCUMENT_ROOT'].$file;
-					$jsFiles[]=$file;
+					array_push($jsFiles[self::POS_BEGIN], $file);
 				}
 			}
 			if(isset($this->scriptFiles[self::POS_END]))
 			{
+                if(count($this->scriptFiles[self::POS_END]))
+                    $jsFiles[self::POS_END] = array();
+
 				foreach($this->scriptFiles[self::POS_END] as $file=>$value)
 				{
 					if(substr($file,0,1)==='/')//it's a relative internal url, prefix with root path
 						$file=$_SERVER['DOCUMENT_ROOT'].$file;
-					$jsFiles[]=$file;
+                    array_push($jsFiles[self::POS_END], $file);
 				}
 			}
 			$this->_jsFiles=$jsFiles;
 		}
+
+        if($position !== null)
+            return $this->_jsFiles[$position];
 		return $this->_jsFiles;
 	}
 	
